@@ -9,6 +9,7 @@ import formatWeather from "./weatherFormatter.js";
 
 export default function App() {
   const [status, setStatus] = useState("Waiting for even hub...");
+  const [showDetails, setShowDetails] = useState(true);
   const dayOfTheWeek = useRef(0);
 
   const weather = [
@@ -64,7 +65,7 @@ export default function App() {
 
           bridge.onEvenHubEvent(async (event) => {
             const gestureType = event.textEvent?.eventType;
-
+            const systemType = event.sysEvent?.eventType;
 
             if (gestureType === 1) {
               dayOfTheWeek.current =
@@ -108,7 +109,13 @@ export default function App() {
                   content: formatWeather(weather[dayOfTheWeek.current]),
                 }),
               );
+            } 
+            
+            //click is under system type as undefined
+            if (gestureType === undefined && systemType === undefined){
+              setShowDetails((prev) => !prev)
             }
+            
           });
         } else {
           setStatus(`Page creation failed. Result: ${result}`);
@@ -125,6 +132,7 @@ export default function App() {
     <main>
       <p>The phone app is running.</p>
       <p>Status: {status}</p>
+      <p>Show details: {showDetails ? "True" : "False"}</p>
     </main>
   );
 }
