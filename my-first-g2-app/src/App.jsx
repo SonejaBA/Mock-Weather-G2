@@ -19,19 +19,34 @@ export default function App() {
     { day: "Friday", high: 85, low: 65 },
   ];
 
-  const textContainer = new TextContainerProperty({
+  const dayContainer = new TextContainerProperty({
     xPosition: 0,
     yPosition: 0,
     width: 576,
-    height: 288,
+    height: 64,
 
     containerID: 1,
-    containerName: "main",
-    content: formatWeather(weather[dayOfTheWeek.current]),
+    containerName: "day",
+    content: weather[dayOfTheWeek.current].day,
 
     borderWidth: 0,
     paddingLength: 4,
     isEventCapture: 1,
+  });
+
+  const dayDataContainer = new TextContainerProperty({
+    xPosition: 0,
+    yPosition: 72,
+    width: 576,
+    height: 216,
+
+    containerID: 2,
+    containerName: "data",
+    content: formatWeather(weather[dayOfTheWeek.current]),
+
+    borderWidth: 0,
+    paddingLength: 4,
+    isEventCapture: 0,
   });
 
   useEffect(() => {
@@ -39,34 +54,57 @@ export default function App() {
       .then(async (bridge) => {
         const result = await bridge.createStartUpPageContainer(
           new CreateStartUpPageContainer({
-            containerTotalNum: 1,
-            textObject: [textContainer],
+            containerTotalNum: 2,
+            textObject: [dayContainer, dayDataContainer],
           }),
         );
 
-        console.log("Page creation result: ", result);
         if (result === 0) {
           setStatus("Page created successfully");
 
           bridge.onEvenHubEvent(async (event) => {
             const gestureType = event.textEvent?.eventType;
+
+
             if (gestureType === 1) {
               dayOfTheWeek.current =
                 (dayOfTheWeek.current - 1 + weather.length) % weather.length;
+
+              
               await bridge.textContainerUpgrade(
                 new TextContainerUpgrade({
                   containerID: 1,
-                  containerName: "main",
+                  containerName: "day",
+                  content: weather[dayOfTheWeek.current].day,
+                }),
+              );
+
+              await bridge.textContainerUpgrade(
+                new TextContainerUpgrade({
+                  containerID: 2,
+                  containerName: "data",
                   content: formatWeather(weather[dayOfTheWeek.current]),
                 }),
               );
+
+
             } else if (gestureType === 2) {
               dayOfTheWeek.current =
                 (dayOfTheWeek.current + 1) % weather.length;
+
+
               await bridge.textContainerUpgrade(
                 new TextContainerUpgrade({
                   containerID: 1,
-                  containerName: "main",
+                  containerName: "day",
+                  content: weather[dayOfTheWeek.current].day,
+                }),
+              );
+
+              await bridge.textContainerUpgrade(
+                new TextContainerUpgrade({
+                  containerID: 2,
+                  containerName: "data",
                   content: formatWeather(weather[dayOfTheWeek.current]),
                 }),
               );
