@@ -5,6 +5,7 @@ import {
   CreateStartUpPageContainer,
   TextContainerUpgrade,
 } from "@evenrealities/even_hub_sdk";
+import formatWeather from "./weatherFormatter.js";
 
 export default function App() {
   const [status, setStatus] = useState("Waiting for even hub...");
@@ -26,7 +27,7 @@ export default function App() {
 
     containerID: 1,
     containerName: "main",
-    content: `${weather[dayOfTheWeek.current].day}\nLow: ${weather[dayOfTheWeek.current].low}°F\nHigh: ${weather[dayOfTheWeek.current].high}°F`,
+    content: formatWeather(weather[dayOfTheWeek.current]),
 
     borderWidth: 0,
     paddingLength: 4,
@@ -56,7 +57,7 @@ export default function App() {
                 new TextContainerUpgrade({
                   containerID: 1,
                   containerName: "main",
-                  content: `${weather[dayOfTheWeek.current].day}\nLow: ${weather[dayOfTheWeek.current].low}°F\nHigh: ${weather[dayOfTheWeek.current].high}°F`,
+                  content: formatWeather(weather[dayOfTheWeek.current]),
                 }),
               );
             } else if (gestureType === 2) {
@@ -66,7 +67,7 @@ export default function App() {
                 new TextContainerUpgrade({
                   containerID: 1,
                   containerName: "main",
-                  content: `${weather[dayOfTheWeek.current].day}\nLow: ${weather[dayOfTheWeek.current].low}°F\nHigh: ${weather[dayOfTheWeek.current].high}°F`,
+                  content: formatWeather(weather[dayOfTheWeek.current]),
                 }),
               );
             }
