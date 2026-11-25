@@ -26,7 +26,7 @@ export default function App() {
 
     containerID: 1,
     containerName: "main",
-    content: "Simulated weather data.",
+    content: `${weather[dayOfTheWeek.current].day}\nLow: ${weather[dayOfTheWeek.current].low}°F\nHigh: ${weather[dayOfTheWeek.current].high}°F`,
 
     borderWidth: 0,
     paddingLength: 4,
@@ -49,8 +49,9 @@ export default function App() {
 
           bridge.onEvenHubEvent(async (event) => {
             const gestureType = event.textEvent?.eventType;
-            console.log("Gesture received:", gestureType);
             if (gestureType === 1) {
+              dayOfTheWeek.current =
+                (dayOfTheWeek.current - 1 + weather.length) % weather.length;
               await bridge.textContainerUpgrade(
                 new TextContainerUpgrade({
                   containerID: 1,
@@ -58,8 +59,9 @@ export default function App() {
                   content: `${weather[dayOfTheWeek.current].day}\nLow: ${weather[dayOfTheWeek.current].low}°F\nHigh: ${weather[dayOfTheWeek.current].high}°F`,
                 }),
               );
-              dayOfTheWeek.current = (dayOfTheWeek.current - 1 + weather.length) % weather.length;
             } else if (gestureType === 2) {
+              dayOfTheWeek.current =
+                (dayOfTheWeek.current + 1) % weather.length;
               await bridge.textContainerUpgrade(
                 new TextContainerUpgrade({
                   containerID: 1,
@@ -67,12 +69,8 @@ export default function App() {
                   content: `${weather[dayOfTheWeek.current].day}\nLow: ${weather[dayOfTheWeek.current].low}°F\nHigh: ${weather[dayOfTheWeek.current].high}°F`,
                 }),
               );
-
-              dayOfTheWeek.current = (dayOfTheWeek.current + 1) % weather.length;
             }
           });
-
-          
         } else {
           setStatus(`Page creation failed. Result: ${result}`);
         }
