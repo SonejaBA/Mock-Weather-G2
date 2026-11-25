@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   waitForEvenAppBridge,
   TextContainerProperty,
@@ -8,8 +8,15 @@ import {
 
 export default function App() {
   const [status, setStatus] = useState("Waiting for even hub...");
+  const dayOfTheWeek = useRef(0);
 
-  const weather = { day: "Monday", high: 72, low: 55 };
+  const weather = [
+    { day: "Monday", high: 62, low: 55 },
+    { day: "Tuesday", high: 75, low: 58 },
+    { day: "Wednesday", high: 78, low: 60 },
+    { day: "Thursday", high: 80, low: 62 },
+    { day: "Friday", high: 85, low: 65 },
+  ];
 
   const textContainer = new TextContainerProperty({
     xPosition: 0,
@@ -19,7 +26,7 @@ export default function App() {
 
     containerID: 1,
     containerName: "main",
-    content: "Swipe up for low, down for high",
+    content: "Simulated weather data.",
 
     borderWidth: 0,
     paddingLength: 4,
@@ -48,20 +55,24 @@ export default function App() {
                 new TextContainerUpgrade({
                   containerID: 1,
                   containerName: "main",
-                  content: `${weather.day}: low ${weather.low}°F`,
+                  content: `${weather[dayOfTheWeek.current].day}\nLow: ${weather[dayOfTheWeek.current].low}°F\nHigh: ${weather[dayOfTheWeek.current].high}°F`,
                 }),
               );
-            }
-            else if (gestureType === 2) {
+              dayOfTheWeek.current = (dayOfTheWeek.current - 1 + weather.length) % weather.length;
+            } else if (gestureType === 2) {
               await bridge.textContainerUpgrade(
                 new TextContainerUpgrade({
                   containerID: 1,
                   containerName: "main",
-                  content: `${weather.day}: high ${weather.high}°F`,
+                  content: `${weather[dayOfTheWeek.current].day}\nLow: ${weather[dayOfTheWeek.current].low}°F\nHigh: ${weather[dayOfTheWeek.current].high}°F`,
                 }),
               );
+
+              dayOfTheWeek.current = (dayOfTheWeek.current + 1) % weather.length;
             }
           });
+
+          
         } else {
           setStatus(`Page creation failed. Result: ${result}`);
         }
