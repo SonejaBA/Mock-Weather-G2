@@ -9,7 +9,7 @@ import formatWeather from "./weatherFormatter.js";
 
 export default function App() {
   const [status, setStatus] = useState("Waiting for even hub...");
-  const [showDetails, setShowDetails] = useState(true);
+  const showDetails = useRef(true);
   const dayOfTheWeek = useRef(0);
 
   const weather = [
@@ -71,7 +71,6 @@ export default function App() {
               dayOfTheWeek.current =
                 (dayOfTheWeek.current - 1 + weather.length) % weather.length;
 
-              
               await bridge.textContainerUpgrade(
                 new TextContainerUpgrade({
                   containerID: 1,
@@ -87,13 +86,10 @@ export default function App() {
                   content: formatWeather(weather[dayOfTheWeek.current]),
                 }),
               );
-
-
             } else if (gestureType === 2) {
               dayOfTheWeek.current =
                 (dayOfTheWeek.current + 1) % weather.length;
 
-
               await bridge.textContainerUpgrade(
                 new TextContainerUpgrade({
                   containerID: 1,
@@ -109,13 +105,33 @@ export default function App() {
                   content: formatWeather(weather[dayOfTheWeek.current]),
                 }),
               );
-            } 
-            
-            //click is under system type as undefined
-            if (gestureType === undefined && systemType === undefined){
-              setShowDetails((prev) => !prev)
             }
-            
+
+            //click is under system type as undefined
+            if (gestureType === undefined && systemType === undefined) {
+              showDetails.current = !showDetails.current;
+
+              if (!showDetails.current) {
+                dayContainer.content = weather[dayOfTheWeek.current].day;
+                dayDataContainer.content = formatWeather(
+                  weather[dayOfTheWeek.current],
+                );
+                const succeeded = await bridge.rebuildPageContainer({
+                  containerTotalNum: 1,
+                  textObject: [dayContainer],
+                });
+              } else {
+                dayContainer.content = weather[dayOfTheWeek.current].day;
+                dayDataContainer.content = formatWeather(
+                  weather[dayOfTheWeek.current],
+                );
+
+                const succeeded = await bridge.rebuildPageContainer({
+                  containerTotalNum: 2,
+                  textObject: [dayContainer, dayDataContainer],
+                });
+              }
+            }
           });
         } else {
           setStatus(`Page creation failed. Result: ${result}`);
@@ -132,7 +148,6 @@ export default function App() {
     <main>
       <p>The phone app is running.</p>
       <p>Status: {status}</p>
-      <p>Show details: {showDetails ? "True" : "False"}</p>
     </main>
   );
 }
