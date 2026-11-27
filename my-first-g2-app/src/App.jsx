@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   waitForEvenAppBridge,
   TextContainerProperty,
+  ImageContainerProperty,
   CreateStartUpPageContainer,
   TextContainerUpgrade,
 } from "@evenrealities/even_hub_sdk";
@@ -39,7 +40,7 @@ export default function App() {
     xPosition: 0,
     yPosition: 72,
     width: 576,
-    height: 216,
+    height: 88,
 
     containerID: 2,
     containerName: "data",
@@ -48,6 +49,15 @@ export default function App() {
     borderWidth: 0,
     paddingLength: 4,
     isEventCapture: 0,
+  });
+
+  const graphContainer = new ImageContainerProperty({
+    xPosition: 0,
+    yPosition: 168,
+    width: 288,
+    height: 120,
+    containerID: 3,
+    containerName: "graph",
   });
 
   useEffect(() => {
@@ -79,13 +89,14 @@ export default function App() {
                 }),
               );
 
-              await bridge.textContainerUpgrade(
-                new TextContainerUpgrade({
-                  containerID: 2,
-                  containerName: "data",
-                  content: formatWeather(weather[dayOfTheWeek.current]),
-                }),
-              );
+              showDetails.current &&
+                (await bridge.textContainerUpgrade(
+                  new TextContainerUpgrade({
+                    containerID: 2,
+                    containerName: "data",
+                    content: formatWeather(weather[dayOfTheWeek.current]),
+                  }),
+                ));
             } else if (gestureType === 2) {
               dayOfTheWeek.current =
                 (dayOfTheWeek.current + 1) % weather.length;
@@ -98,13 +109,14 @@ export default function App() {
                 }),
               );
 
-              await bridge.textContainerUpgrade(
-                new TextContainerUpgrade({
-                  containerID: 2,
-                  containerName: "data",
-                  content: formatWeather(weather[dayOfTheWeek.current]),
-                }),
-              );
+              showDetails.current &&
+                (await bridge.textContainerUpgrade(
+                  new TextContainerUpgrade({
+                    containerID: 2,
+                    containerName: "data",
+                    content: formatWeather(weather[dayOfTheWeek.current]),
+                  }),
+                ));
             }
 
             //click is under system type as undefined
