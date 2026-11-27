@@ -8,6 +8,24 @@ import {
 } from "@evenrealities/even_hub_sdk";
 import formatWeather from "./weatherFormatter.js";
 
+async function makeSampleGraph(low, high) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 288;
+  canvas.height = 120;
+
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 120, 50, -low);
+  ctx.fillRect(70, 120, 50, -high);
+
+  const blob = await new Promise((resolve) =>
+    canvas.toBlob(resolve, "image/png"),
+  );
+  if (!blob) throw new Error("Could not create graph image");
+
+  return new Uint8Array(await blob.arrayBuffer());
+}
+
 export default function App() {
   const [status, setStatus] = useState("Waiting for even hub...");
   const showDetails = useRef(true);
@@ -65,13 +83,26 @@ export default function App() {
       .then(async (bridge) => {
         const result = await bridge.createStartUpPageContainer(
           new CreateStartUpPageContainer({
-            containerTotalNum: 2,
+            containerTotalNum: 3,
             textObject: [dayContainer, dayDataContainer],
+            imageObject: [graphContainer],
           }),
         );
 
+        //0 is a successfull page
         if (result === 0) {
           setStatus("Page created successfully");
+
+          const imageResult = await bridge.updateImageRawData({
+            containerID: 3,
+            containerName: "graph",
+            imageData: await makeSampleGraph(
+              weather[dayOfTheWeek.current].low,
+              weather[dayOfTheWeek.current].high,
+            ),
+          });
+
+          console.log("Graph image result:", imageResult);
 
           bridge.onEvenHubEvent(async (event) => {
             const gestureType = event.textEvent?.eventType;
@@ -97,6 +128,16 @@ export default function App() {
                     content: formatWeather(weather[dayOfTheWeek.current]),
                   }),
                 ));
+
+              showDetails.current &&
+                (await bridge.updateImageRawData({
+                  containerID: 3,
+                  containerName: "graph",
+                  imageData: await makeSampleGraph(
+                    weather[dayOfTheWeek.current].low,
+                    weather[dayOfTheWeek.current].high,
+                  ),
+                }));
             } else if (gestureType === 2) {
               dayOfTheWeek.current =
                 (dayOfTheWeek.current + 1) % weather.length;
@@ -117,6 +158,16 @@ export default function App() {
                     content: formatWeather(weather[dayOfTheWeek.current]),
                   }),
                 ));
+
+              showDetails.current &&
+                (await bridge.updateImageRawData({
+                  containerID: 3,
+                  containerName: "graph",
+                  imageData: await makeSampleGraph(
+                    weather[dayOfTheWeek.current].low,
+                    weather[dayOfTheWeek.current].high,
+                  ),
+                }));
             }
 
             //click is under system type as undefined
@@ -132,16 +183,31 @@ export default function App() {
                   containerTotalNum: 1,
                   textObject: [dayContainer],
                 });
+                console.log("Rebuild succeeded: ", succeeded);
               } else {
                 dayContainer.content = weather[dayOfTheWeek.current].day;
+
                 dayDataContainer.content = formatWeather(
                   weather[dayOfTheWeek.current],
                 );
 
                 const succeeded = await bridge.rebuildPageContainer({
-                  containerTotalNum: 2,
+                  containerTotalNum: 3,
                   textObject: [dayContainer, dayDataContainer],
+                  imageObject: [graphContainer],
                 });
+                console.log("Rebuild succeeded: ", succeeded);
+
+                if (succeeded) {
+                  await bridge.updateImageRawData({
+                    containerID: 3,
+                    containerName: "graph",
+                    imageData: await makeSampleGraph(
+                      weather[dayOfTheWeek.current].low,
+                      weather[dayOfTheWeek.current].high,
+                    ),
+                  });
+                }
               }
             }
           });
